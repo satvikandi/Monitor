@@ -11,45 +11,23 @@ var proxy = httpProxy.createServer();
 
 var TARGET;
 
-var PROD = 'http://52.6.22.174:5000';
-/*
-http.createServer(function (req, res) {
-  //
-  // On each request, get the first location from the list...
-  //
- // var target = { target: addresses.shift() };
+var original = 'http://52.5.198.199:5000';
 
-  //
-  // ...then proxy to the server whose 'turn' it is...
-  //
- // console.log('balancing request to: ', target);
- 
- TARGET = PROD;
-  proxy.web(req, res, TARGET);
-
-  //
-  // ...and then the server you just used becomes the last item in the list.
-  //
-//addresses.push(target.target);
-}).listen(8089);
-*/
 var app = http.createServer(function (req, res) {
 	   
-     // res.writeHead(200, { 'Content-Type': 'text/html' });
-     // res.end();
-	 TARGET = PROD;
+     TARGET = original;
 	  proxy.web( req, res, {target: TARGET } );
     })
   , io = sio.listen(app);
 
 function memoryLoad()
 {
-	//console.log( os.totalmem(), os.freemem() );
+	
 	var totalMem = os.totalmem() - os.freemem();
 	var memPercent = ~~((totalMem/os.totalmem())* 100);
-	console.log("Memory",memPercent);
+	console.log("Memory Usage : ",memPercent);
 	return memPercent;
-	//return 0;
+	
 }
 
 // Create function to get CPU information
@@ -90,7 +68,7 @@ function cpuAverage()
 	//Calculate the average percentage CPU usage
 	var loadDifference = (totalDifference - idleDifference) ;
 	var percentLoad = ~~((loadDifference/totalDifference)*100);
-	console.log("CPU Cycle",percentLoad);
+	console.log("CPU load is : ",percentLoad);
 	return percentLoad;
 	
 	//return 0;
@@ -164,13 +142,10 @@ setInterval( function ()
 {
 	io.sockets.emit('heartbeat', 
 	{ 
-		//var cpu = cpuAverage();
-		//var memory = memoryLoad();
-        name: "Your Computer", canary:canary(cpuAverage(), memoryLoad()),
+		
+        name: "Your Computer", canary:canaryThreshold(cpuAverage(), memoryLoad()),
         nodes: calcuateColor()
 		
-		//if(cpu >=25)
-		//	console.log("canary killed");
    });
 }, 2000);
 app.listen(3000);
@@ -212,12 +187,9 @@ function createServer(port, fn)
 	server.latency = undefined;
 }
 
-function canary(cpu, memoryLoad)
+function canaryThreshold(cpu, memoryLoad)
 {
-	//var cpu =  cpuAverage();
-	//var memoryLoad = memoryLoad();
-	
+
 	if(cpu >= 95)
-		//console.log("kill here");
 		exec('forever stopall');
 }
