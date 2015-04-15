@@ -189,7 +189,7 @@ function createServer(port, fn)
 
 function canaryThreshold(cpu, memoryLoad)
 {
-
-	if(cpu >= 95)
+// kill the canary if the CPU usage goes above the threshold set below
+	if(cpu >= 90)
 		exec('forever stopall');
 }
